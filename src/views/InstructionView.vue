@@ -21,7 +21,7 @@
           <i class="bi bi-search feature-icon"></i>
           <h3 class="gradient-text">1. 영화 선택</h3>
           <div class="instruction-image">
-            <img src="@/assets/images/movieselect1.gif" alt="영화 검색 방법" />
+            <img :src="API_URL + 'instruction/movieselect1.gif'" alt="영화 검색 방법" />
           </div>
           <p class="lead text-white">홈화면에서 원하는 영화를 선택하세요.<br>원하는 영화가 없다면, 커뮤니티 게시판에 남겨보세요!</p>
         </div>
@@ -32,7 +32,7 @@
           <i class="bi bi-search feature-icon"></i>
           <h3 class="gradient-text">1. 영화 선택</h3>
           <div class="instruction-image">
-            <img src="@/assets/images/movieselect2.gif" alt="영화 검색 방법" />
+            <img :src="API_URL + 'instruction/movieselect2.gif'" alt="영화 검색 방법" />
           </div>
           <p class="lead text-white">아니면... 영화 목록에서 선택해도 되구요.</p>
         </div>
@@ -45,7 +45,7 @@
           <i class="bi bi-pencil-square feature-icon"></i>
           <h3 class="gradient-text">2. 프롬프트 작성</h3>
           <div class="instruction-image">
-            <img src="@/assets/images/promptinput.gif" alt="프롬프트 작성 방법" />
+            <img :src="API_URL + 'instruction/promptinput.gif'" alt="프롬프트 작성 방법" />
           </div>
           <p class="lead text-white">원하는 추가 상황을 입력해주세요.<br>매 생성 때마다 5개의 토큰이 소모된답니다!<br>그리고... 조금만 기다려주실래요?</p>
         </div>
@@ -56,7 +56,7 @@
           <i class="bi bi-pencil-square feature-icon"></i>
           <h3 class="gradient-text">2. 프롬프트 작성</h3>
           <div class="instruction-image">
-            <img src="@/assets/images/promptreinput.gif" alt="프롬프트 작성 방법" />
+            <img :src="API_URL + 'instruction/promptreinput.gif'" alt="프롬프트 작성 방법" />
           </div>
           <p class="lead text-white">결과가 마음에 안 든다면 수정사항을 알려주세요.<br>이 경우에도 5개의 토큰이 소모됩니다!<br>AI가 선택한 엔딩을 기반으로 다시 만들어줄거에요!</p>
         </div>
@@ -68,7 +68,7 @@
           <i class="bi bi-share feature-icon"></i>
           <h3 class="gradient-text">3. 결과 확인 및 공유</h3>
           <div class="instruction-image">
-            <img src="@/assets/images/postending.gif" alt="결과 확인 및 공유 방법" />
+            <img :src="API_URL + 'instruction/postending.gif'" alt="결과 확인 및 공유 방법" />
           </div>
           <p class="lead text-white">결말이 마음에 든다면<br>제목으로 쓸 프롬프트와 내용이 될 엔딩을 골라<br>다른 사용자들과 공유해보세요!</p>
         </div>
@@ -98,16 +98,19 @@
            class="indicator" 
            :class="{ active: currentSection === n - 1 }"
            @click="goToSection(n - 1)">
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</template>
+    </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useMovieStore } from '@/stores/movieStore';
 
+const store = useMovieStore()
 const currentSection = ref(0);
 const totalSections = 7;
+const API_URL = store.BASE_URL
 
 const nextSection = () => {
   if (currentSection.value < totalSections - 1) {
@@ -147,6 +150,7 @@ const handleWheel = (e) => {
 
   lastScrollTime = currentTime;
 };
+
 
 // 터치 이벤트를 위한 변수
 let touchStartY = 0;
