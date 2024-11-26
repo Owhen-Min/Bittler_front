@@ -1,7 +1,6 @@
 <template>
   <div class="container-fluid bg-dark py-5">
     <div class="container card bg-dark text-white py-5">
-      <!-- Board Header -->
       <header class="board-header d-flex justify-content-between align-items-center mb-4">
         <h2 class="gradient-text">AI 게시판</h2>
         <div class="d-flex align-items-center gap-3">
@@ -21,8 +20,8 @@
       <!-- Table Header -->
       <div class="d-flex table-header rounded">
         <div class="col-1 text-center font-weight-bold">번호</div>
-        <div class="col-7 text-center font-weight-bold">제목 </div>
-        <div class="col-2 text-center font-weight-bold">작성자</div>
+        <div class="col-6 text-center font-weight-bold">제목 </div>
+        <div class="col-3 text-center font-weight-bold">작성자</div>
         <div class="col-1 text-center font-weight-bold">조회수</div>
         <div class="col-1 text-center font-weight-bold">좋아요</div>
       </div>
@@ -30,10 +29,13 @@
       <!-- Posts List -->
       <div v-for="ending in paginatedEndings" :key="ending.id" class="post-item" @click="goDetail(ending.id)">
         <div class="col-1 text-center">{{ ending.id }}</div>
-        <div class="col-7 text-left ending-prompt"> {{ ending.prompt }} <span class="comment-count">[{{ ending.comment_set.length }}]</span></div>
-        <div class="col-2 text-center">{{ ending.user_nickname }}</div>
+        <div class="col-6 text-left ending-prompt"> {{ ending.prompt }} <span class="comment-count">[{{ ending.comment_set.length }}]</span></div>
+        <div class="col-3 text-center">
+          <img :src="store.BASE_URL + ending.user_profile_picture" alt="프로필 사진" class="profile-picture">
+          {{ ending.user_nickname }}
+        </div>
         <div class="col-1 text-center">{{ ending.view }}</div>
-        <div class="col-1 text-center">{{ ending.like_users.length }}</div>
+        <div class="col-1 text-center">{{ ending.like_count }}</div>
       </div>
 
       <!-- Pagination Footer -->
@@ -135,10 +137,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.profile-picture {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .container {
   background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(10px);
   border: none;
+  margin-top : 2.3rem;
 }
 
 .gradient-text {

@@ -8,7 +8,7 @@
         class="d-flex comment-item pages col-12 justify-content-between align-items-center"
       >
         <div class="col-8">
-          <p class="comment-author">{{ comment.user_nickname }}</p>
+          <p class="comment-author" @click="goProfile(comment.user_id)">{{ comment.user_nickname }}</p>
           <p v-if="!comment.isEditing" class="comment-content">{{ comment.content }}</p>
           <textarea 
             v-else 
@@ -55,7 +55,7 @@
     </form>
   </div>
   <!-- Pagination Footer -->
-  <footer class="board-footer d-flex justify-content-between align-items-center mt-4">
+  <footer class="board-footer d-flex justify-content-between align-items-center mt-4" v-if="totalPages >1 ">
     <button 
       class="btn btn-warning" 
       @click="goToPage('prev')"
@@ -64,7 +64,7 @@
       이전 페이지로
     </button>
     
-    <div class="page-info">
+    <div class="page-info text-white">
       {{ currentPage }} / {{ totalPages }}
     </div>
     
@@ -85,11 +85,11 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const store = useMovieStore()
-
-const router = useRouter();
+const router = useRouter()
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
+const sortOption = ref('recent');
 const content = ref(null)
 const comments = ref([])
 const props = defineProps({
@@ -114,6 +114,23 @@ onMounted(() => {
     })
 })
 
+// 정렬된 게시글
+const sortedComments = computed(() => {
+  if (!comments.value) return [];
+  
+  const sorted = [...comments.value];
+  switch (sortOption.value) {
+    case 'recent':
+      return sorted.sort((a, b) => b.id - a.id);
+    default:
+      return sorted;
+  }
+});
+
+const goProfile = (userid) => {
+  router.push({ name: 'Profile', params: { userid } })
+}
+
 const createComment = function () {
   axios({
     method: 'post',
@@ -126,9 +143,21 @@ const createComment = function () {
     },
   })
     .then((response) => {
-      comments.value.push(response.data)
+      axios({
+        method: 'get',
+        url: `${store.API_URL}/${props.nextUrl}/${props.pk}/comments/`,
+      })
+        .then((response) => {
+          comments.value = response.data.map(comment => ({
+            ...comment,
+            isEditing: false,
+            editContent: comment.content,
+          }))
+        })
+        .catch((error) => {
+          store.showModalMessage('댓글 불러오기에 실패했습니다.', error)
+        })
       content.value = null
-      store.getMyProfile()
     })
     .catch((error) => {
       store.showModalMessage('댓글 작성에 실패했습니다.', error)
@@ -185,12 +214,12 @@ const formatDate = (dateString) => {
 const paginatedComments = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  return comments.value.slice(start, end);
+  return sortedComments.value.slice(start, end);
 });
 
 // 전체 페이지 수
 const totalPages = computed(() => 
-  Math.ceil(comments.value.length / itemsPerPage)
+  Math.ceil(sortedComments.value.length / itemsPerPage)
 );
 
 
@@ -220,16 +249,18 @@ const goToPage = (direction) => {
 }
 
 .comment-item {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.3);
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .comment-author {
   color: #ff6b6b;
   font-weight: bold;
   margin-bottom: 5px;
+  cursor: pointer;
 }
 
 .comment-content {
@@ -237,9 +268,10 @@ const goToPage = (direction) => {
 }
 
 .comment-form {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.3);
   padding: 20px;
   border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .comment-date {
@@ -252,8 +284,15 @@ const goToPage = (direction) => {
 }
 
 .form-control {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.form-control:focus {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: #ffb88c;
+  box-shadow: 0 0 0 0.2rem rgba(255, 184, 140, 0.25);
   color: white;
 }
 
@@ -269,5 +308,62 @@ const goToPage = (direction) => {
 
 .submit-button:hover {
   transform: scale(1.05);
+}
+
+/* 페이지네이션 관련 스타일 추가 */
+.board-footer {
+  padding: 1rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+}
+
+.btn-warning {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #ffb88c;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: rgba(255, 184, 140, 0.2);
+  border-color: #ffb88c;
+  color: white;
+}
+
+.btn-danger {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #ff6b6b;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: #ff6b6b;
+  color: white;
+}
+
+.btn-success {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #40c057;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: rgba(64, 192, 87, 0.2);
+  border-color: #40c057;
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.page-info {
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
 }
 </style>

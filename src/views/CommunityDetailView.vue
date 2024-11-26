@@ -9,7 +9,7 @@
               <div class="meta-left">
                 <div class="meta-item">
                   <i class="bi bi-person-fill"></i>
-                  <span>작성자: <strong>{{ article.user_nickname }}</strong></span>
+                  <span @click="goProfile(article.user)" class="cursor-pointer"><img :src="store.BASE_URL + article.user_profile_picture" alt="프로필 사진" class="profile-picture"> <span class="mx-1"></span> <strong>{{ article.user_nickname }}</strong></span>
                 </div>
               </div>
               <div class="meta-right">
@@ -20,16 +20,12 @@
               </div>
             </div>
           </div>
-
           <!-- Article Body -->
           <div class="article-body card p-4 mb-4">
             <p class="article-text">{{ article.content }}</p>
           </div>
 
           <div class="action-buttons d-flex justify-content-between mb-4">
-            <RouterLink :to="{name:'Community'}" class="btn btn-warning">
-              이전으로
-            </RouterLink>
             <div class="d-flex gap-3" v-if="store.isLogin && article.user === store.user.pk">
               <button @click="updateArticle(article.id)" class="btn btn-primary">
                 수정하기
@@ -38,17 +34,18 @@
                 삭제
               </button>
             </div>
+            <div class="d-flex align-items-center" v-else>
+              <Like
+                :pk="article.id"
+                :isLiked="isLiked"
+                nextUrl="communities"
+              />
+            </div>
+            <RouterLink :to="{name:'Community'}" class="btn btn-warning d-flex align-items-center">
+              이전으로
+            </RouterLink>
           </div>
 
-          <!-- Like Component -->
-          <Like
-            :pk="article.id"
-            :isLiked="isLiked"
-            nextUrl="communities"
-            class="mb-4"
-          />
-
-          <!-- Comments Component -->
           <Comments
             :pk="article.id"
             nextUrl="communities"
@@ -80,6 +77,9 @@ watch(() => article.value?.like_users, (newValue) => {
   }
 }, { immediate: true })
 
+const goProfile = (userid) => {
+  router.push({ name: 'Profile', params: { userid } })
+}
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -116,6 +116,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.profile-picture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 .container {
   background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(10px);

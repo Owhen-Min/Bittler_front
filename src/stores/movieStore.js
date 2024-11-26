@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 
 
 export const useMovieStore = defineStore('movie', () => {
-  const BASE_URL = 'http://127.0.0.1:8000'
+  const BASE_URL = 'http://3.25.58.14'
   const API_VER = '/api/v1'
   const API_URL = BASE_URL + API_VER
   const token = ref(null)
@@ -58,6 +58,9 @@ export const useMovieStore = defineStore('movie', () => {
       .then((response) => {
         const password = password1
         logIn({ username, password })
+          .then(() => {
+            router.push({ name: 'Instruction' })
+          })
       })
       .catch((error) => {
         const errorMessages = Object.entries(error.response.data)
@@ -86,16 +89,7 @@ export const useMovieStore = defineStore('movie', () => {
         token.value = response.data.key
         return axios({
           method: 'get',
-          url: `${API_URL}/accounts/user/`,
-          headers: {
-            Authorization: `Token ${token.value}`,
-          },
-        })
-      })
-      .then((response) => {
-        return axios({
-          method: 'get',
-          url: `${API_URL}/accounts/${response.data.pk}/`,
+          url: `${API_URL}/accounts/0/`,
           headers: {
             Authorization: `Token ${token.value}`,
           },
@@ -122,6 +116,7 @@ export const useMovieStore = defineStore('movie', () => {
     })
       .then((response) => {
         token.value = null,
+        user.value = null,
         router.push({ name: 'Home' })
       })
       .catch((error) => {
@@ -161,8 +156,10 @@ export const useMovieStore = defineStore('movie', () => {
 
   const getMyProfile = async () => {
     try {
-      const response = await axios.get(`${API_URL}/accounts/${user.value.pk}/`)
-      user.value = response.data
+      if (user.value !== null) {
+        const response = await axios.get(`${API_URL}/accounts/${user.value.pk}/`)
+        user.value = response.data
+      }
     } catch (error) {
       console.error('user 정보 갱신 실패: ', error)
     }
