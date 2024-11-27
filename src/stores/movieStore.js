@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 
 
 export const useMovieStore = defineStore('movie', () => {
-  const BASE_URL = 'http://3.25.58.14'
+  const BASE_URL = 'http://3.25.58.212'
   const API_VER = '/api/v1'
   const API_URL = BASE_URL + API_VER
   const token = ref(null)
